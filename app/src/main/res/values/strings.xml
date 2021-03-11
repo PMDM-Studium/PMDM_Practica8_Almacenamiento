@@ -3,6 +3,7 @@
     <string name="txtHintCuaderno">Nombre del Cuaderno</string>
     <string name="txtHintFecha">Fecha del Apunte</string>
     <string name="txtHintApunte">Texto del Apunte</string>
+    <string name="txtHintIdCuadernoFK">ID Cuaderno</string>
     <string name="txtBtnGuardar">Guardar</string>
     <string name="txtBtnCancelar">Cancelar</string>
     <string name="txtBtnAtras">Atras</string>

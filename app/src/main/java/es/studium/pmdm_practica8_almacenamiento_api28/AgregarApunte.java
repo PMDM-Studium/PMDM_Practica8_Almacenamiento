@@ -23,13 +23,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AgregarApunte extends AppCompatActivity {
-//    int idFK=ApuntesActivity.idFK;
-//    String idCuadernoFK = String.valueOf(idFK);
+    int idFK = ApuntesActivity.idSeleccionado;
+    String idFKString = String.valueOf(idFK);
     String servidor= "192.168.1.79";
     AltaRemota alta;
     private Button btnAgregarApunte, btnCancelarNuevoApunte;
-    private EditText etFechaApunte,etTexto;
-    TextView txtFechaApunte, txtNombre;
+    private EditText etFechaApunte,etTexto, etIdCuadernoFk;
+    TextView txtFechaApunte, txtNombre, txtIdCuadernoFK;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,9 +37,13 @@ public class AgregarApunte extends AppCompatActivity {
 
         //Instanciar vistas
         etFechaApunte = findViewById(R.id.txtFechaApunte);
-        etTexto = findViewById(R.id.txtApunte);
+        etTexto = findViewById(R.id.txtTextoApunte);
+        etIdCuadernoFk = findViewById(R.id.txtIdCuadernoFK);
         btnAgregarApunte = findViewById(R.id.btnAgregarApunte);
         btnCancelarNuevoApunte = findViewById(R.id.btnCancelarNuevoApunte);
+
+        etIdCuadernoFk.setText(idFKString);
+        etIdCuadernoFk.setEnabled(false);
 
         //Agregar listener al boton guardar
         btnAgregarApunte.setOnClickListener(new View.OnClickListener() {
@@ -48,8 +52,10 @@ public class AgregarApunte extends AppCompatActivity {
                 //Resetear errores a ambos
                 etFechaApunte.setError(null);
                 etTexto.setError(null);
+                etIdCuadernoFk.setError(null);
                 String fecha = etFechaApunte.getText().toString(),
-                        texto= etTexto.getText().toString();
+                        texto= etTexto.getText().toString(),
+                        idCuaderno=etIdCuadernoFk.getText().toString();
                 if ("".equals(fecha)) {
                     etFechaApunte.setError("Escribe la fecha del Apunte");
                     etFechaApunte.requestFocus();
@@ -57,15 +63,27 @@ public class AgregarApunte extends AppCompatActivity {
                 }
                 if ("".equals(texto)){
                     etTexto.setError("Escribe el texto del Apunte");
+                    etTexto.requestFocus();
+                    return;
+                }
+                if ("".equals(idCuaderno)){
+                    etIdCuadernoFk.setError("Error no tiene el FK");
+                    etIdCuadernoFk.requestFocus();
                     return;
                 }
                 Toast.makeText(AgregarApunte.this, "Alta datos...", Toast.LENGTH_SHORT).show();
-                txtNombre = findViewById(R.id.txtCuaderno);
+
+                txtNombre = findViewById(R.id.txtTextoApunte);
                 txtFechaApunte = findViewById(R.id.txtFechaApunte);
-//                alta = new AltaRemota(txtFechaApunte.getText().toString(),
-//                        txtNombre.getText().toString(), idCuadernoFK);
-//                alta.execute();
+                txtIdCuadernoFK = findViewById(R.id.txtIdCuadernoFK);
+
+                alta = new AltaRemota(txtFechaApunte.getText().toString(),
+                        txtNombre.getText().toString(), txtIdCuadernoFK.getText().toString());
+                alta.execute();
                 txtNombre.setFocusable(false);
+                txtFechaApunte.setFocusable(false);
+                txtIdCuadernoFK.setFocusable(false);
+                finish();
             }
         });
         // El de cancelar simplemente cierra la actividad
@@ -81,15 +99,17 @@ public class AgregarApunte extends AppCompatActivity {
         // Atributos
         String fechaApunte, textoApunte, idCuadernoFK;
         // Constructor
-        public AltaRemota(String fechaApunte, String txtoApunte, String idCuadernoFK)
+        public AltaRemota(String fechaApunte, String textoApunte, String idCuadernoFK)
         {
             this.fechaApunte = fechaApunte;
-            this.textoApunte = txtoApunte;
+            this.textoApunte = textoApunte;
             this.idCuadernoFK = idCuadernoFK;
         }
         // Inspectoras
         protected void onPreExecute()
         {
+
+            //txtIdCuadernoFK.setText(idCuadernoFK);
             Toast.makeText(AgregarApunte.this, "Alta..."+this.textoApunte, Toast.LENGTH_SHORT).show();
         }
         protected String doInBackground(Void... argumentos)
@@ -144,8 +164,11 @@ public class AgregarApunte extends AppCompatActivity {
             // Actualizamos los cuadros de texto
             txtFechaApunte = findViewById(R.id.txtFechaApunte);
             txtFechaApunte.setText(fechaApunte);
-            txtNombre = findViewById(R.id.txtApunte);
+            txtNombre = findViewById(R.id.txtTextoApunte);
             txtNombre.setText(textoApunte);
+            txtIdCuadernoFK = findViewById(R.id.txtIdCuadernoFK);
+            txtIdCuadernoFK.setText(idCuadernoFK);
+
             Toast.makeText(AgregarApunte.this, "Alta Correcta...",
                     Toast.LENGTH_SHORT).show();
         }

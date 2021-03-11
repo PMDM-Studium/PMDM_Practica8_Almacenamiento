@@ -16,10 +16,11 @@
         android:hint="@string/txtHintFecha"
         android:inputType="date"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:autofillHints="" />
 
     <EditText
-        android:id="@+id/txtApunte"
+        android:id="@+id/txtTextoApunte"
         android:layout_width="278dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -28,7 +29,22 @@
         android:hint="@string/txtHintApunte"
         android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtFechaApunte" />
+        app:layout_constraintTop_toBottomOf="@+id/txtFechaApunte"
+        android:autofillHints="" />
+
+    <EditText
+        android:id="@+id/txtIdCuadernoFK"
+        android:layout_width="278dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:focusable="false"
+        android:ems="10"
+        android:hint="@string/txtHintIdCuadernoFK"
+        android:inputType="text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtTextoApunte"
+        android:autofillHints="" />
 
     <Button
         android:id="@+id/btnAgregarApunte"
@@ -39,19 +55,16 @@
         android:layout_marginTop="20dp"
         android:text="@string/txtBtnGuardar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtApunte" />
+        app:layout_constraintTop_toBottomOf="@+id/txtIdCuadernoFK" />
 
     <Button
         android:id="@+id/btnCancelarNuevoApunte"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="76dp"
         android:layout_marginTop="20dp"
-        android:layout_marginEnd="8dp"
         android:text="@string/txtBtnCancelar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.391"
-        app:layout_constraintStart_toEndOf="@+id/btnAgregarCuaderno"
-        app:layout_constraintTop_toBottomOf="@+id/txtApunte" />
+        app:layout_constraintStart_toEndOf="@+id/btnAgregarApunte"
+        app:layout_constraintTop_toBottomOf="@+id/txtIdCuadernoFK" />
 </androidx.constraintlayout.widget.ConstraintLayout>

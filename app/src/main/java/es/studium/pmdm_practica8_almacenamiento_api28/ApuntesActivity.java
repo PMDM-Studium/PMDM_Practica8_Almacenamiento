@@ -32,6 +32,7 @@ package es.studium.pmdm_practica8_almacenamiento_api28;
 
 public class ApuntesActivity extends AppCompatActivity {
     int idFK = MainActivity.idSeleccionado;
+    public static int idSeleccionado = MainActivity.idSeleccionado;
     ListView listaApuntes;
     String servidor = "192.168.1.79";
     // Atributos

@@ -55,6 +55,7 @@ public class AgregarCuaderno extends AppCompatActivity {
                 alta = new AltaRemota(txtNombre.getText().toString());
                 alta.execute();
                 txtNombre.setFocusable(false);
+//                finish();
             }
         });
         // El de cancelar simplemente cierra la actividad

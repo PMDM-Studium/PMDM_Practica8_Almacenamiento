@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">PMDM_Practica8_Almacenamiento_API28</string>
+    <string name="txtHintCuaderno">Nombre del Cuaderno</string>
+    <string name="txtHintFecha">Fecha del Apunte</string>
+    <string name="txtHintApunte">Texto del Apunte</string>
+    <string name="txtBtnGuardar">Guardar</string>
+    <string name="txtBtnCancelar">Cancelar</string>
+    <string name="txtBtnAtras">Atras</string>
+</resources>

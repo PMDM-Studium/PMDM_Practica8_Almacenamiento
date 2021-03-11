@@ -18,42 +18,53 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AgregarApunte extends AppCompatActivity {
+//    int idFK=ApuntesActivity.idFK;
+//    String idCuadernoFK = String.valueOf(idFK);
     String servidor= "192.168.1.79";
     AltaRemota alta;
     private Button btnAgregarApunte, btnCancelarNuevoApunte;
-    private EditText etCuaderno;
-    TextView txtNombre;
+    private EditText etFechaApunte,etTexto;
+    TextView txtFechaApunte, txtNombre;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_agregar_cuaderno);
+        setContentView(R.layout.activity_agregar_apunte);
 
         //Instanciar vistas
-        etCuaderno = findViewById(R.id.txtCuaderno);
-        btnAgregarApunte = findViewById(R.id.btnAgregarCuaderno);
-        btnCancelarNuevoApunte = findViewById(R.id.btnCancelarNuevoCuaderno);
+        etFechaApunte = findViewById(R.id.txtFechaApunte);
+        etTexto = findViewById(R.id.txtApunte);
+        btnAgregarApunte = findViewById(R.id.btnAgregarApunte);
+        btnCancelarNuevoApunte = findViewById(R.id.btnCancelarNuevoApunte);
 
         //Agregar listener al boton guardar
         btnAgregarApunte.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //Resetear errores a ambos
-                etCuaderno.setError(null);
-                String texto = etCuaderno.getText().toString();
-                if ("".equals(texto)) {
-                    etCuaderno.setError("Escribe el nombre del cuaderno");
-                    etCuaderno.requestFocus();
+                etFechaApunte.setError(null);
+                etTexto.setError(null);
+                String fecha = etFechaApunte.getText().toString(),
+                        texto= etTexto.getText().toString();
+                if ("".equals(fecha)) {
+                    etFechaApunte.setError("Escribe la fecha del Apunte");
+                    etFechaApunte.requestFocus();
                     return;
                 }
-                Toast.makeText(AgregarApunte.this, "Alta datos...",
-                        Toast.LENGTH_SHORT).show();
+                if ("".equals(texto)){
+                    etTexto.setError("Escribe el texto del Apunte");
+                    return;
+                }
+                Toast.makeText(AgregarApunte.this, "Alta datos...", Toast.LENGTH_SHORT).show();
                 txtNombre = findViewById(R.id.txtCuaderno);
-                alta = new AltaRemota(txtNombre.getText().toString());
-                alta.execute();
+                txtFechaApunte = findViewById(R.id.txtFechaApunte);
+//                alta = new AltaRemota(txtFechaApunte.getText().toString(),
+//                        txtNombre.getText().toString(), idCuadernoFK);
+//                alta.execute();
                 txtNombre.setFocusable(false);
             }
         });
@@ -68,24 +79,25 @@ public class AgregarApunte extends AppCompatActivity {
     private class AltaRemota extends AsyncTask<Void, Void, String>
     {
         // Atributos
-        String nombreCuaderno;
+        String fechaApunte, textoApunte, idCuadernoFK;
         // Constructor
-        public AltaRemota(String nombre)
+        public AltaRemota(String fechaApunte, String txtoApunte, String idCuadernoFK)
         {
-            this.nombreCuaderno = nombre;
+            this.fechaApunte = fechaApunte;
+            this.textoApunte = txtoApunte;
+            this.idCuadernoFK = idCuadernoFK;
         }
         // Inspectoras
         protected void onPreExecute()
         {
-            Toast.makeText(AgregarApunte.this, "Alta..."+this.nombreCuaderno,
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(AgregarApunte.this, "Alta..."+this.textoApunte, Toast.LENGTH_SHORT).show();
         }
         protected String doInBackground(Void... argumentos)
         {
             try {
                 // Crear la URL de conexión al API
                 URL url = new
-                        URL("http://"+servidor+"/ApiRest/cuadernos.php");
+                        URL("http://"+servidor+"/ApiRest/apuntes.php");
                 // Crear la conexión HTTP
                 HttpURLConnection myConnection = (HttpURLConnection)
                         url.openConnection();
@@ -95,8 +107,12 @@ public class AgregarApunte extends AppCompatActivity {
                 String response = "";
                 HashMap<String, String> postDataParams = new
                         HashMap<String, String>();
-                postDataParams.put("nombreCuaderno",
-                        this.nombreCuaderno);
+                postDataParams.put("fechaApunte",
+                        this.fechaApunte);
+                postDataParams.put("textoApunte",
+                        this.textoApunte);
+                postDataParams.put("idCuadernoFK",
+                        this.idCuadernoFK);
                 myConnection.setDoInput(true);
                 myConnection.setDoOutput(true);
                 OutputStream os = myConnection.getOutputStream();
@@ -126,8 +142,10 @@ public class AgregarApunte extends AppCompatActivity {
         protected void onPostExecute(String mensaje)
         {
             // Actualizamos los cuadros de texto
-            txtNombre = findViewById(R.id.cuaderno);
-            txtNombre.setText(nombreCuaderno);
+            txtFechaApunte = findViewById(R.id.txtFechaApunte);
+            txtFechaApunte.setText(fechaApunte);
+            txtNombre = findViewById(R.id.txtApunte);
+            txtNombre.setText(textoApunte);
             Toast.makeText(AgregarApunte.this, "Alta Correcta...",
                     Toast.LENGTH_SHORT).show();
         }

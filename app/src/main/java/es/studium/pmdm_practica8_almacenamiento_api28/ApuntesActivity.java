@@ -31,6 +31,7 @@ package es.studium.pmdm_practica8_almacenamiento_api28;
          import java.util.Date;
 
 public class ApuntesActivity extends AppCompatActivity {
+    int idFK = MainActivity.idSeleccionado;
     ListView listaApuntes;
     String servidor = "192.168.1.79";
     // Atributos
@@ -127,7 +128,6 @@ public class ApuntesActivity extends AppCompatActivity {
         }
         protected String doInBackground(Void... argumentos)
         {
-            int idFK = MainActivity.idSeleccionado;
             if(!arrayListApuntes.isEmpty()) {
                 arrayListApuntes.clear();
             }

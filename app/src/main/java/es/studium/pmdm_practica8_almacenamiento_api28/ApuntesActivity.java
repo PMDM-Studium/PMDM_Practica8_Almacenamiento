@@ -1,44 +1,46 @@
 package es.studium.pmdm_practica8_almacenamiento_api28;
 
-         import androidx.appcompat.app.AlertDialog;
-         import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
-         import android.content.DialogInterface;
-         import android.content.Intent;
-         import android.os.AsyncTask;
-         import android.os.Bundle;
-         import android.util.Log;
-         import android.view.View;
-         import android.widget.AdapterView;
-         import android.widget.Button;
-         import android.widget.EditText;
-         import android.widget.ListView;
-         import android.widget.TextView;
-         import android.widget.Toast;
+import android.content.DialogInterface;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
 
-         import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-         import org.json.JSONArray;
-         import org.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-         import java.io.BufferedReader;
-         import java.io.BufferedWriter;
-         import java.io.InputStream;
-         import java.io.InputStreamReader;
-         import java.io.OutputStream;
-         import java.io.OutputStreamWriter;
-         import java.io.UnsupportedEncodingException;
-         import java.net.HttpURLConnection;
-         import java.net.URI;
-         import java.net.URL;
-         import java.net.URLEncoder;
-         import java.util.ArrayList;
-         import java.util.Date;
-         import java.util.HashMap;
-         import java.util.Map;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class ApuntesActivity extends AppCompatActivity {
     int idFK = MainActivity.idSeleccionado;
+    int idSelect;
     String idFKString = String.valueOf(idFK);
     ListView listaApuntes;
     String servidor = "192.168.1.79";
@@ -53,6 +55,7 @@ public class ApuntesActivity extends AppCompatActivity {
     ConsultaRemota acceso;
     AltaRemota alta;
     BajaRemota baja;
+    ModificacionRemota modifica;
     ArrayList<Apuntes> arrayListApuntes;
     AdaptadorApuntes adaptadorApuntes;
     private FloatingActionButton fabAgregarApunte;
@@ -103,7 +106,52 @@ public class ApuntesActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                //Un click
+                // Create an alert builder
+                AlertDialog.Builder builder = new AlertDialog.Builder(ApuntesActivity.this);
+                builder.setTitle("Name");
 
+                // set the custom layout
+                final View customLayout = getLayoutInflater().inflate(R.layout.dialogo_modificar_apunte, null);
+                builder.setView(customLayout);
+                try {
+                    jsonobject = result.getJSONObject((int) id);
+                    idApunte = jsonobject.getString("idApunte");
+                    fechaApunte = jsonobject.getString("fechaApunte");
+                    textoApunte = jsonobject.getString("textoApunte");
+                    idCuadernoFK = jsonobject.getString("idCuadernoFK");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                //Cargamos el EditText
+                txtFechaApunte = customLayout.findViewById(R.id.dlgFechaApunte);
+                txtNombre = customLayout.findViewById(R.id.dlgTextoApunte);
+                //Establecemos los valores
+                txtFechaApunte.setText(fechaApunte);
+                txtNombre.setText(textoApunte);
+                //Volvemos a cargar
+                txtFechaApunte = customLayout.findViewById(R.id.dlgFechaApunte);
+                txtNombre = customLayout.findViewById(R.id.dlgTextoApunte);
+                // add a button
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        // send data from the AlertDialog to the Activity
+                        Toast.makeText(ApuntesActivity.this, "Alta datos...", Toast.LENGTH_SHORT).show();
+
+                        modifica = new ModificacionRemota(String.valueOf(id), txtFechaApunte.getText().toString(), txtNombre.getText().toString(), idFKString);
+                        modifica.execute();
+                    }
+                });
+                builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                // create and show the alert dialog
+                builder.show();
+                acceso = new ConsultaRemota();
+                acceso.execute();
             }
         });
         fabAgregarApunte.setOnClickListener(new View.OnClickListener() {
@@ -112,7 +160,7 @@ public class ApuntesActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Create an alert builder
                 AlertDialog.Builder builder = new AlertDialog.Builder(ApuntesActivity.this);
-                builder.setTitle("Name");
+                builder.setTitle("Agregar Apunte");
 
                 // set the custom layout
                 final View customLayout = getLayoutInflater().inflate(R.layout.dialogo_agregar_apunte, null);
@@ -127,8 +175,6 @@ public class ApuntesActivity extends AppCompatActivity {
 
                         txtFechaApunte = customLayout.findViewById(R.id.dlgFechaApunte);
                         txtNombre = customLayout.findViewById(R.id.dlgTextoApunte);
-
-
 
                         Toast.makeText(ApuntesActivity.this, "Alta datos...", Toast.LENGTH_SHORT).show();
                         alta = new AltaRemota(txtFechaApunte.getText().toString(), txtNombre.getText().toString(), idFKString);
@@ -323,83 +369,87 @@ public class ApuntesActivity extends AppCompatActivity {
             }
         }
     }
-//    private class ModificacionRemota extends AsyncTask<Void, Void, String>
-//    {
-//        // Atributos
-//        String idApunte;
-//        String nombreCuaderno;
-//        // Constructor
-//        public ModificacionRemota(String id,String nombre)
-//        {
-//            this.idCuaderno = id;
-//            this.nombreCuaderno = nombre;
-//        }
-//        // Inspectores
-//        protected void onPreExecute()
-//        {
-//            Toast.makeText(MainActivity.this, "Modificando...", Toast.LENGTH_SHORT).show();
-//        }
-//        protected String doInBackground(Void... voids)
-//        {
-//            try
-//            {
-//                String response = "";
-//                Uri uri = new Uri.Builder()
-//                        .scheme("http")
-//                        .authority(servidor)
-//                        .path("/ApiRest/cuadernos.php")
-//                        .appendQueryParameter("idCuaderno", this.idCuaderno)
-//                        .appendQueryParameter("nombreCuaderno",
-//                                this.nombreCuaderno)
-//                        .build();
-//                // Create connection
-//                URL url = new URL(uri.toString());
-//                HttpURLConnection connection = (HttpURLConnection)
-//                        url.openConnection();
-//                connection.setReadTimeout(15000);
-//                connection.setConnectTimeout(15000);
-//                connection.setRequestMethod("PUT");
-//                connection.setDoInput(true);
-//                connection.setDoOutput(true);
-//                int responseCode=connection.getResponseCode();
-//                if (responseCode == HttpsURLConnection.HTTP_OK)
-//                {
-//                    String line;
-//                    BufferedReader br=new BufferedReader(new
-//                            InputStreamReader(connection.getInputStream()));
-//                    while ((line=br.readLine()) != null)
-//                    {
-//                        response+=line;
-//                    }
-//                }
-//                else
-//                {
-//                    response="";
-//                }
-//                connection.getResponseCode();
-//                if (connection.getResponseCode() == 200)
-//                {
-//                    // Success
-//                    Log.println(Log.ASSERT,"Resultado", "Registro modificado:"+response);
-//                    connection.disconnect();
-//                }
-//                else
-//                {
-//                    // Error handling code goes here
-//                    Log.println(Log.ASSERT,"Error", "Error");
-//                }
-//            }
-//            catch(Exception e)
-//            {
-//                Log.println(Log.ASSERT,"Excepción", e.getMessage());
-//            }
-//            return null;
-//        }
-//        protected void onPostExecute(String mensaje)
-//        {
-//            Toast.makeText(MainActivity.this, "Actualizando datos...", Toast.LENGTH_SHORT).show();
-//        }
-//    }
+    private class ModificacionRemota extends AsyncTask<Void, Void, String>
+    {
+        // Atributos
+        String idApunte, fechaApunte, textoApunte, idCuadernoFK;
+        // Constructor
+        public ModificacionRemota(String idApunte,String fechaApunte, String textoApunte, String idCuadernoFK)
+        {
+            this.idApunte = idApunte;
+            this.fechaApunte = fechaApunte;
+            this.textoApunte = textoApunte;
+            this.idCuadernoFK = idCuadernoFK;
+        }
+        // Inspectores
+        protected void onPreExecute()
+        {
+            Toast.makeText(ApuntesActivity.this, "Modificando...", Toast.LENGTH_SHORT).show();
+        }
+        protected String doInBackground(Void... voids)
+        {
+            try
+            {
+                String response = "";
+                Uri uri = new Uri.Builder()
+                        .scheme("http")
+                        .authority(servidor)
+                        .path("/ApiRest/apuntes.php")
+                        .appendQueryParameter("idApunte", this.idApunte)
+                        .appendQueryParameter("fechaApunte", this.fechaApunte)
+                        .appendQueryParameter("textoApunte", this.textoApunte)
+                        .appendQueryParameter("idCuadernoFK", this.idCuadernoFK)
+                        .build();
+                // Create connection
+                URL url = new URL(uri.toString());
+                HttpURLConnection connection = (HttpURLConnection)
+                        url.openConnection();
+                connection.setReadTimeout(15000);
+                connection.setConnectTimeout(15000);
+                connection.setRequestMethod("PUT");
+                connection.setDoInput(true);
+                connection.setDoOutput(true);
+                int responseCode=connection.getResponseCode();
+                if (responseCode == HttpsURLConnection.HTTP_OK)
+                {
+                    String line;
+                    BufferedReader br=new BufferedReader(new
+                            InputStreamReader(connection.getInputStream()));
+                    while ((line=br.readLine()) != null)
+                    {
+                        response+=line;
+                    }
+                }
+                else
+                {
+                    response="";
+                }
+                connection.getResponseCode();
+                if (connection.getResponseCode() == 200)
+                {
+                    // Success
+                    Log.println(Log.ASSERT,"Resultado", "Registro modificado:"+response);
+                    connection.disconnect();
+                }
+                else
+                {
+                    // Error handling code goes here
+                    Log.println(Log.ASSERT,"Error", "Error");
+                }
+            }
+            catch(Exception e)
+            {
+                Log.println(Log.ASSERT,"Excepción", e.getMessage());
+            }
+            return null;
+        }
+        protected void onPostExecute(String mensaje)
+        {
+            Toast.makeText(ApuntesActivity.this, "Actualizando datos...", Toast.LENGTH_SHORT).show();
+            acceso = new ConsultaRemota();
+            acceso.execute();
+        }
+    }
     private class AltaRemota extends AsyncTask<Void, Void, String>
     {
         // Atributos

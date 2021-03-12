@@ -8,12 +8,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -106,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Create an alert builder
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setTitle("Name");
+                builder.setTitle("Agregar Cuaderno");
 
                 // set the custom layout
                 final View customLayout = getLayoutInflater().inflate(R.layout.dialogo_agregar_cuaderno, null);
@@ -299,83 +295,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-//    private class ModificacionRemota extends AsyncTask<Void, Void, String>
-//    {
-//        // Atributos
-//        String idCuaderno;
-//        String nombreCuaderno;
-//        // Constructor
-//        public ModificacionRemota(String id,String nombre)
-//        {
-//            this.idCuaderno = id;
-//            this.nombreCuaderno = nombre;
-//        }
-//        // Inspectores
-//        protected void onPreExecute()
-//        {
-//            Toast.makeText(MainActivity.this, "Modificando...", Toast.LENGTH_SHORT).show();
-//        }
-//        protected String doInBackground(Void... voids)
-//        {
-//            try
-//            {
-//                String response = "";
-//                Uri uri = new Uri.Builder()
-//                        .scheme("http")
-//                        .authority(servidor)
-//                        .path("/ApiRest/cuadernos.php")
-//                        .appendQueryParameter("idCuaderno", this.idCuaderno)
-//                        .appendQueryParameter("nombreCuaderno",
-//                                this.nombreCuaderno)
-//                        .build();
-//                // Create connection
-//                URL url = new URL(uri.toString());
-//                HttpURLConnection connection = (HttpURLConnection)
-//                        url.openConnection();
-//                connection.setReadTimeout(15000);
-//                connection.setConnectTimeout(15000);
-//                connection.setRequestMethod("PUT");
-//                connection.setDoInput(true);
-//                connection.setDoOutput(true);
-//                int responseCode=connection.getResponseCode();
-//                if (responseCode == HttpsURLConnection.HTTP_OK)
-//                {
-//                    String line;
-//                    BufferedReader br=new BufferedReader(new
-//                            InputStreamReader(connection.getInputStream()));
-//                    while ((line=br.readLine()) != null)
-//                    {
-//                        response+=line;
-//                    }
-//                }
-//                else
-//                {
-//                    response="";
-//                }
-//                connection.getResponseCode();
-//                if (connection.getResponseCode() == 200)
-//                {
-//                    // Success
-//                    Log.println(Log.ASSERT,"Resultado", "Registro modificado:"+response);
-//                    connection.disconnect();
-//                }
-//                else
-//                {
-//                    // Error handling code goes here
-//                    Log.println(Log.ASSERT,"Error", "Error");
-//                }
-//            }
-//            catch(Exception e)
-//            {
-//                Log.println(Log.ASSERT,"Excepción", e.getMessage());
-//            }
-//            return null;
-//        }
-//        protected void onPostExecute(String mensaje)
-//        {
-//            Toast.makeText(MainActivity.this, "Actualizando datos...", Toast.LENGTH_SHORT).show();
-//        }
-//    }
+
     private class AltaRemota extends AsyncTask<Void, Void, String>
     {
         // Atributos

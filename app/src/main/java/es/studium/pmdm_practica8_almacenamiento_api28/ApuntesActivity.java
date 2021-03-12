@@ -11,7 +11,9 @@ package es.studium.pmdm_practica8_almacenamiento_api28;
          import android.view.View;
          import android.widget.AdapterView;
          import android.widget.Button;
+         import android.widget.EditText;
          import android.widget.ListView;
+         import android.widget.TextView;
          import android.widget.Toast;
 
          import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -20,8 +22,11 @@ package es.studium.pmdm_practica8_almacenamiento_api28;
          import org.json.JSONObject;
 
          import java.io.BufferedReader;
+         import java.io.BufferedWriter;
          import java.io.InputStream;
          import java.io.InputStreamReader;
+         import java.io.OutputStream;
+         import java.io.OutputStreamWriter;
          import java.io.UnsupportedEncodingException;
          import java.net.HttpURLConnection;
          import java.net.URI;
@@ -29,10 +34,12 @@ package es.studium.pmdm_practica8_almacenamiento_api28;
          import java.net.URLEncoder;
          import java.util.ArrayList;
          import java.util.Date;
+         import java.util.HashMap;
+         import java.util.Map;
 
 public class ApuntesActivity extends AppCompatActivity {
     int idFK = MainActivity.idSeleccionado;
-    public static int idSeleccionado = MainActivity.idSeleccionado;
+    String idFKString = String.valueOf(idFK);
     ListView listaApuntes;
     String servidor = "192.168.1.79";
     // Atributos
@@ -42,7 +49,9 @@ public class ApuntesActivity extends AppCompatActivity {
     String fechaApunte ="";
     String textoApunte = "";
     String idCuadernoFK ="";
+    EditText txtFechaApunte, txtNombre;
     ConsultaRemota acceso;
+    AltaRemota alta;
     BajaRemota baja;
     ArrayList<Apuntes> arrayListApuntes;
     AdaptadorApuntes adaptadorApuntes;
@@ -53,12 +62,16 @@ public class ApuntesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_apuntes);
+
         listaApuntes = findViewById(R.id.listaapuntesContainer);
         fabAgregarApunte = findViewById(R.id.floatingActionButtonapuntes);
         btnAtras = findViewById(R.id.btnAtras);
+
         arrayListApuntes = new ArrayList<>();
         acceso = new ConsultaRemota();
         acceso.execute();
+
+
 
         //Ponemos primero el click largo para que no afecte al corto.
         listaApuntes.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -99,8 +112,40 @@ public class ApuntesActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent( ApuntesActivity.this, AgregarApunte.class);
-                startActivity(intent);
+                Toast.makeText(ApuntesActivity.this, "ID ... "+idFKString, Toast.LENGTH_SHORT).show();
+
+                // Create an alert builder
+                AlertDialog.Builder builder = new AlertDialog.Builder(ApuntesActivity.this);
+                builder.setTitle("Name");
+
+                // set the custom layout
+                final View customLayout = getLayoutInflater().inflate(R.layout.dialogo_agregar_apunte, null);
+                builder.setView(customLayout);
+
+                // add a button
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        // send data from the AlertDialog to the Activity
+
+                        txtFechaApunte = customLayout.findViewById(R.id.dlgFechaApunte);
+                        txtNombre = customLayout.findViewById(R.id.dlgTextoApunte);
+
+
+
+                        Toast.makeText(ApuntesActivity.this, "Alta datos...", Toast.LENGTH_SHORT).show();
+                        alta = new AltaRemota(txtFechaApunte.getText().toString(), txtNombre.getText().toString(), idFKString);
+                        alta.execute();
+                    }
+                });
+                builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                // create and show the alert dialog
+                builder.show();
             }
         });
         btnAtras.setOnClickListener(new View.OnClickListener() {
@@ -363,4 +408,96 @@ public class ApuntesActivity extends AppCompatActivity {
 //                    Toast.LENGTH_SHORT).show();
 //        }
 //    }
+    private class AltaRemota extends AsyncTask<Void, Void, String>
+    {
+        // Atributos
+        String fechaApunte, textoApunte, idCuadernoFK;
+        // Constructor
+        public AltaRemota(String fechaApunte, String textoApunte, String idCuadernoFK)
+        {
+            this.fechaApunte = fechaApunte;
+            this.textoApunte = textoApunte;
+            this.idCuadernoFK = idCuadernoFK;
+        }
+        // Inspectoras
+        protected void onPreExecute()
+        {
+            Toast.makeText(ApuntesActivity.this, "Alta..."+this.textoApunte, Toast.LENGTH_SHORT).show();
+        }
+        protected String doInBackground(Void... argumentos)
+        {
+            try {
+                // Crear la URL de conexión al API
+                URL url = new
+                        URL("http://"+servidor+"/ApiRest/apuntes.php");
+                // Crear la conexión HTTP
+                HttpURLConnection myConnection = (HttpURLConnection)
+                        url.openConnection();
+                // Establecer método de comunicación.
+                myConnection.setRequestMethod("POST");
+                // Conexión exitosa
+                String response = "";
+                HashMap<String, String> postDataParams = new
+                        HashMap<String, String>();
+                postDataParams.put("fechaApunte",
+                        this.fechaApunte);
+                postDataParams.put("textoApunte",
+                        this.textoApunte);
+                postDataParams.put("idCuadernoFK",
+                        this.idCuadernoFK);
+                myConnection.setDoInput(true);
+                myConnection.setDoOutput(true);
+                OutputStream os = myConnection.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new
+                        OutputStreamWriter(os, "UTF-8"));
+                writer.write(getPostDataString(postDataParams));
+                writer.flush();
+                writer.close();
+                os.close();
+                myConnection.getResponseCode();
+                if (myConnection.getResponseCode() == 200)
+                {
+                    // Success
+                    myConnection.disconnect();
+                }
+                else {
+                    // Error handling code goes here
+                    Log.println(Log.ASSERT, "Error", "Error");
+                }
+            }
+            catch(Exception e)
+            {
+                Log.println(Log.ASSERT,"Excepción", e.getMessage());
+            }
+            return (null);
+        }
+        protected void onPostExecute(String mensaje)
+        {
+            // Actualizamos los cuadros de texto
+            Toast.makeText(ApuntesActivity.this, "Alta Correcta...", Toast.LENGTH_SHORT).show();
+            acceso = new ConsultaRemota();
+            acceso.execute();
+        }
+        private String getPostDataString(HashMap<String, String> params)
+                throws UnsupportedEncodingException
+        {
+            StringBuilder result = new StringBuilder();
+            boolean first = true;
+            for(Map.Entry<String, String> entry : params.entrySet())
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    result.append("&");
+                }
+                result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+                result.append("=");
+                result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+            }
+            return result.toString();
+        }
+    }
 }

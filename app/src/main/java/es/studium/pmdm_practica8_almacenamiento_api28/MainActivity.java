@@ -8,9 +8,14 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -19,14 +24,19 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     ListView listaCuadernos;
@@ -36,7 +46,9 @@ public class MainActivity extends AppCompatActivity {
     JSONObject jsonobject;
     String idCuaderno="";
     String nombreCuaderno= "";
+    TextView txtNombre;
     ConsultaRemota acceso;
+    AltaRemota alta;
     BajaRemota baja;
     ArrayList<Cuadernos> arrayListCuadernos;
     AdaptadorCuadernos adaptadorCuadernos;
@@ -96,8 +108,35 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent( MainActivity.this, AgregarCuaderno.class);
-                startActivity(intent);
+                // Create an alert builder
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Name");
+
+                // set the custom layout
+                final View customLayout = getLayoutInflater().inflate(R.layout.dialogo_agregar_cuaderno, null);
+                builder.setView(customLayout);
+
+                // add a button
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        // send data from the AlertDialog to the Activity
+                        txtNombre = customLayout.findViewById(R.id.txtNombreCuaderno);
+
+                        Toast.makeText(MainActivity.this, "Alta datos...", Toast.LENGTH_SHORT).show();
+                        alta = new AltaRemota(txtNombre.getText().toString());
+                        alta.execute();
+                        txtNombre.setFocusable(false);
+                    }
+                });
+                builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                // create and show the alert dialog
+                builder.show();
             }
         });
     }
@@ -115,8 +154,6 @@ public class MainActivity extends AppCompatActivity {
             }
                 adaptadorCuadernos= new AdaptadorCuadernos(MainActivity.this, arrayListCuadernos);
                 Toast.makeText(MainActivity.this, "Obteniendo datos...", Toast.LENGTH_SHORT).show();
-
-
         }
         protected String doInBackground(Void... argumentos)
         {
@@ -128,19 +165,16 @@ public class MainActivity extends AppCompatActivity {
                     URL url = new
                             URL("http://" + servidor + "/ApiRest/cuadernos.php");
                     // Crear la conexión HTTP
-                    HttpURLConnection myConnection = (HttpURLConnection)
-                            url.openConnection();
+                    HttpURLConnection myConnection = (HttpURLConnection) url.openConnection();
                     // Establecer método de comunicación. Por defecto GET.
                     myConnection.setRequestMethod("GET");
                     if (myConnection.getResponseCode() == 200) {
                         // Conexión exitosa
                         // Creamos Stream para la lectura de datos desde el servidor
                         InputStream responseBody = myConnection.getInputStream();
-                        InputStreamReader responseBodyReader =
-                                new InputStreamReader(responseBody, "UTF-8");
+                        InputStreamReader responseBodyReader = new InputStreamReader(responseBody, "UTF-8");
                         // Creamos Buffer de lectura
-                        BufferedReader bR = new
-                                BufferedReader(responseBodyReader);
+                        BufferedReader bR = new BufferedReader(responseBodyReader);
                         String line = "";
                         StringBuilder responseStrBuilder = new StringBuilder();
                         // Leemos el flujo de entrada
@@ -175,8 +209,6 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String mensaje)
         {
             listaCuadernos.setAdapter(adaptadorCuadernos);
-
-
         }
     }
 
@@ -352,4 +384,84 @@ public class MainActivity extends AppCompatActivity {
 //                    Toast.LENGTH_SHORT).show();
 //        }
 //    }
+    private class AltaRemota extends AsyncTask<Void, Void, String>
+    {
+        // Atributos
+        String nombreCuaderno;
+        // Constructor
+        public AltaRemota(String nombre)
+        {
+            this.nombreCuaderno = nombre;
+        }
+        // Inspectoras
+        protected void onPreExecute()
+        {
+            Toast.makeText(MainActivity.this, "Alta..."+this.nombreCuaderno, Toast.LENGTH_SHORT).show();
+        }
+        protected String doInBackground(Void... argumentos)
+        {
+            try {
+                // Crear la URL de conexión al API
+                URL url = new URL("http://"+servidor+"/ApiRest/cuadernos.php");
+                // Crear la conexión HTTP
+                HttpURLConnection myConnection = (HttpURLConnection) url.openConnection();
+                // Establecer método de comunicación.
+                myConnection.setRequestMethod("POST");
+                // Conexión exitosa
+                String response = "";
+                HashMap<String, String> postDataParams = new HashMap<String, String>();
+                postDataParams.put("nombreCuaderno", this.nombreCuaderno);
+                myConnection.setDoInput(true);
+                myConnection.setDoOutput(true);
+                OutputStream os = myConnection.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+                writer.write(getPostDataString(postDataParams));
+                writer.flush();
+                writer.close();
+                os.close();
+                myConnection.getResponseCode();
+                if (myConnection.getResponseCode() == 200)
+                {
+                    // Success
+                    myConnection.disconnect();
+                }
+                else {
+                    // Error handling code goes here
+                    Log.println(Log.ASSERT, "Error", "Error");
+                }
+            }
+            catch(Exception e)
+            {
+                Log.println(Log.ASSERT,"Excepción", e.getMessage());
+            }
+            return (null);
+        }
+        protected void onPostExecute(String mensaje)
+        {
+            Toast.makeText(MainActivity.this, "Alta Correcta...", Toast.LENGTH_SHORT).show();
+            acceso = new ConsultaRemota();
+            acceso.execute();
+        }
+        private String getPostDataString(HashMap<String, String> params)
+                throws UnsupportedEncodingException
+        {
+            StringBuilder result = new StringBuilder();
+            boolean first = true;
+            for(Map.Entry<String, String> entry : params.entrySet())
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    result.append("&");
+                }
+                result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+                result.append("=");
+                result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+            }
+            return result.toString();
+        }
+    }
 }

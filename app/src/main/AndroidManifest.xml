@@ -14,7 +14,6 @@
         android:usesCleartextTraffic="true">
         <activity android:name=".AgregarApunte"></activity>
         <activity android:name=".ApuntesActivity" />
-        <activity android:name=".AgregarCuaderno" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

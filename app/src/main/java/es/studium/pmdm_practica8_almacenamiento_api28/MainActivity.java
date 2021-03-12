@@ -70,14 +70,11 @@ public class MainActivity extends AppCompatActivity {
         listaCuadernos.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MainActivity.this, "Largo "+position+" - "+id, Toast.LENGTH_SHORT).show();
-
                 AlertDialog dialog = new AlertDialog.Builder(MainActivity.this).setPositiveButton("Sí", new DialogInterface.OnClickListener() {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(MainActivity.this, "Eliminando datos...",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Eliminando datos...", Toast.LENGTH_SHORT).show();
                         baja = new BajaRemota(id+"");
                         baja.execute();
                         acceso = new ConsultaRemota();
@@ -98,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
         listaCuadernos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MainActivity.this, position+" - "+id, Toast.LENGTH_SHORT).show();
                 idSeleccionado= (int) id;
                 Intent intent = new Intent( MainActivity.this, ApuntesActivity.class);
                 startActivity(intent);
@@ -224,8 +220,7 @@ public class MainActivity extends AppCompatActivity {
         // Inspectores
         protected void onPreExecute()
         {
-            Toast.makeText(MainActivity.this, "Eliminando...",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Eliminando...", Toast.LENGTH_SHORT).show();
         }
         @Override
         protected String doInBackground(Void... voids)
@@ -262,8 +257,7 @@ public class MainActivity extends AppCompatActivity {
         }
         protected void onPostExecute(String mensaje)
         {
-            Toast.makeText(MainActivity.this, "Actualizando datos...",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Actualizando datos...", Toast.LENGTH_SHORT).show();
         }
         URI applyParameters(URI uri, String[] urlParameters)
         {
@@ -319,8 +313,7 @@ public class MainActivity extends AppCompatActivity {
 //        // Inspectores
 //        protected void onPreExecute()
 //        {
-//            Toast.makeText(MainActivity.this, "Modificando...",
-//                    Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "Modificando...", Toast.LENGTH_SHORT).show();
 //        }
 //        protected String doInBackground(Void... voids)
 //        {
@@ -380,8 +373,7 @@ public class MainActivity extends AppCompatActivity {
 //        }
 //        protected void onPostExecute(String mensaje)
 //        {
-//            Toast.makeText(MainActivity.this, "Actualizando datos...",
-//                    Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "Actualizando datos...", Toast.LENGTH_SHORT).show();
 //        }
 //    }
     private class AltaRemota extends AsyncTask<Void, Void, String>
